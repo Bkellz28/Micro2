@@ -28,5 +28,5 @@
 3. | Verify red LED is flashing
    | -- if it is flashing, the code is on the device
    |
-4. | Press button and observe traffic light pattern 
+4. | Press button and observe traffic light pattern! 
    |  
