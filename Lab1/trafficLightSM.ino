@@ -45,19 +45,18 @@ void loop() {
     if (curLight == 0) {
       // currently RED
       if (counter == 20000) {
-        // RED over, turn off LED and buzzer, reset counter, iterate curLight to GREEN
+        // RED over, turn off LED, reset counter, iterate curLight to GREEN
         digitalWrite(redLED, LOW);
-        tone(buzzer, 1000);
         curLight = 1;
         counter = 0;
       }
       else if (counter >= 17000) {
         // RED almost over, keep LED on and turn buzzer on
         digitalWrite(redLED, HIGH);
-        digitalWrite(buzzer, HIGH);
+        tone(buzzer, 500);
       }
       else {
-        // RED in progress, keep LED on, turn buzzer off
+        // RED in progress, keep LED on, ensure buzzer off
         digitalWrite(redLED, HIGH);
         noTone(buzzer);
       }
@@ -66,19 +65,18 @@ void loop() {
     else if (curLight == 1) {
       // currently GREEN
       if (counter == 20000) {
-        // GREEN over, turn off LED and buzzer, reset counter, iterate curLight to YELLOW
+        // GREEN over, turn off LED, reset counter, iterate curLight to YELLOW
         digitalWrite(greenLED, LOW);
-        tone(buzzer, 1000);
         curLight = 2;
         counter = 0;
       }
       else if (counter >= 17000) {
         // GREEN almost over, keep LED on and turn buzzer on
         digitalWrite(greenLED, HIGH);
-        digitalWrite(buzzer, HIGH);
+        tone(buzzer, 500);
       }
       else {
-        // GREEN in progress, keep LED on
+        // GREEN in progress, keep LED on, ensure buzzer off
         digitalWrite(greenLED, HIGH);
         noTone(buzzer);
       }
@@ -87,9 +85,8 @@ void loop() {
     else if (curLight == 2) {
       // currently YELLOW
       if (counter == 6000) {
-        // YELLOW over, turn off LED and buzzer, reset counter, iterate curLight to RED
+        // YELLOW over, turn off LED, reset counter, iterate curLight to RED
         digitalWrite(yellowLED, LOW);
-        tone(buzzer, 1000);
         curLight = 0;
         counter = 0;
       }
@@ -98,10 +95,10 @@ void loop() {
         int blinkNum = counter / 200;
         if (blinkNum % 2 == 0) { digitalWrite(yellowLED, HIGH); }
         else { digitalWrite(yellowLED, LOW); }
-        digitalWrite(buzzer, HIGH);
+        tone(buzzer, 500);
       }
       else {
-        // YELLOW in progress, keep LED on
+        // YELLOW in progress, keep LED on, ensure buzzer off
         digitalWrite(yellowLED, HIGH);
         noTone(buzzer);
       }
