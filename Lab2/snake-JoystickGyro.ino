@@ -1,25 +1,25 @@
 #include<Wire.h>
 
-int VRx = A0;
-int VRy = A1;
+int VRx = A0; //joystick x-axis pin
+int VRy = A1; //joystick y-axis pin
 
-int buzzer = 8;
+int buzzer = 12; //buzzer pin
 
-int xPosition = 0;
-int yPosition = 0;
+int xInput = 0;
+int yInput = 0;
 int SW_state = 0;
 int mapX = 0;
 int mapY = 0;
 char up = 'w', down = 's', left = 'a' , right = 'd';
 
-int incomingByte = 0;
+int dataIn = 0;
 
-const int MPU_addr=0x68;  // I2C address of the MPU-6050
-int16_t GyX,GyY,GyZ;
+const int mcAddr = 0x68;  // I2C address of the MPU-6050 (microprocessorAddress)
+int16_t gyroX,gyroY,gyroZ;
 
 void setup() {
   Wire.begin();
-  Wire.beginTransmission(MPU_addr);
+  Wire.beginTransmission(mcAddr);
   Wire.write(0x6B);   //PWR_MGMT_1 register
   Wire.write(0);      //set to zero (wakes up the MPU-6050)
   Wire.endTransmission(true);
@@ -33,52 +33,48 @@ void setup() {
 
 void loop() {
 
-  //Read joystick for joystick values
-  xPosition = analogRead(VRx);
-  yPosition = analogRead(VRy);
-  mapX = map(xPosition, 0, 1023, -512, 512);
-  mapY = map(yPosition, 0, 1023, -512, 512);
+  //Read joystick for joystick inputs
+  xInput = analogRead(VRx);
+  yInput = analogRead(VRy);
+  mapX = map(xInput, 0, 1023, -512, 512);
+  mapY = map(yInput, 0, 1023, -512, 512);
 
-  //Read gyroscope for values
-  Wire.beginTransmission(MPU_addr); 
+  //Read gyroscope for tilt input
+  Wire.beginTransmission(mcAddr); 
   Wire.write(0x43);     //starting with register 0x43
   Wire.endTransmission(false);
-  Wire.requestFrom(MPU_addr, 6, true); //request 6 registers
-  GyX = Wire.read() << 8 | Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
-  GyY = Wire.read() << 8 | Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
-  GyZ = Wire.read() << 8 | Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
+  Wire.requestFrom(mcAddr, 6, true); //request 6 registers
+  gyroX = Wire.read() << 8 | Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
+  gyroY = Wire.read() << 8 | Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
+  gyroZ = Wire.read() << 8 | Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
 
-  //For if statements, OR joystick values with gyro values so whichever one is detected, the program takes
-  //converting code to readable info to python
-  //printing values to serial monitor
-  if((mapX > 200) || (GyX < -4000)){
+  //Send instructions to game based on inputs by printing to serial monitor
+  //OR joystick and gyro input vars so either device is accepted
+  if((mapX > 300) || (gyroX < -4000)){
     Serial.print(right);
     delay(100);
   }
-  else if((mapX < -200) || (GyX > 4000)){
+  else if((mapX < -300) || (gyroX > 4000)){
     Serial.print(left);
     delay(100);
   }
-  else if((mapY > 200) || (GyY > 4000)){
+  else if((mapY > 300) || (gyroY > 4000)){
     Serial.print(up);
     delay(100);
   }
-  else if((mapY < -200) || (GyY < -4000)){
+  else if((mapY < -300) || (gyroY < -4000)){
     Serial.print(down);
     delay(100);
   }
 
-  //read flag from python if apple is eaten
-  if(Serial.available() > 0){
-    incomingByte = Serial.read();
-    Serial.println(incomingByte);
+  //read data from game to check for apple eaten flag
+  dataIn = Serial.read();
+  Serial.println(dataIn);
 
-    if(incomingByte == 'A'){
-      digitalWrite(buzzer, HIGH);
-      delay(100);
-      digitalWrite(buzzer, LOW);
-    }
-    
+  if(dataIn == 'A'){ //activate buzzer if data read is apple eaten flag
+    digitalWrite(buzzer, HIGH);
+    delay(100);
+    digitalWrite(buzzer, LOW);
   }
-  
+    
 }
